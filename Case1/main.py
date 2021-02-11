@@ -39,11 +39,16 @@ f19_20 = BS.forward_rate()
 print('Forward rate from 19 to 20 years (in %): ',np.round(f19_20,3))
 
 # Now do the ultimate forward zerocurve projection
-ZC = BS.UFR_zerocurve()
+ZC_long_extrapolate = BS.UFR_zerocurve()
 print(ZC.loc[[21,40,60]])
 #plot_UFR(ZC)
 
 # Now obtain ultimate forward curve
 BS = bootstrap(df_swap)
 UFR_forward_curve = BS.UFR_forward()
-plot_UFR_fc(UFR_forward_curve)
+print(UFR_forward_curve.loc[[1,10,30,50]])
+#plot_UFR_fc(UFR_forward_curve)
+
+# Now do the ultimate forward zerocurve with convergence numbers
+ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
+plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate)

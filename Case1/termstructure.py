@@ -82,18 +82,29 @@ class bootstrap():
         f12 = f12*100
         return f12
 
-    def UFR_zerocurve(self):
+    def UFR_zerocurve(self, mode='extrapolate'):
         """Extend using a fixed number for the one-year forward rate the zerocurve up to 60 years"""
-        # Get UFR rate
-        UFR = self.forward_rate(19,20)/100
-        # Get zerocurve
-        zerocurve = self.get_zerocurve()
-        # From 20 years onward, we consider the UFR as forward rate for each consecutive year
-        # Add elements to zerocurve
-        for year in range(21,61):
-            new_rate = ((UFR+1)*(1+zerocurve.loc[year-1]/100)**(year-1))**(1/year)-1
-            zerocurve.loc[year] = new_rate*100
-        return zerocurve
+        if mode == 'extrapolate':
+            # Get UFR rate
+            UFR = self.forward_rate(19,20)/100
+            # Get zerocurve
+            zerocurve = self.get_zerocurve()
+            # From 20 years onward, we consider the UFR as forward rate for each consecutive year
+            # Add elements to zerocurve
+            for year in range(21,61):
+                new_rate = ((UFR+1)*(1+zerocurve.loc[year-1]/100)**(year-1))**(1/year)-1
+                zerocurve.loc[year] = new_rate*100
+            return zerocurve
+        elif mode == 'UFR_convergence':
+            zerocurve = self.get_zerocurve()
+            # Obtain UFR curve from other function
+            UFR_curve = self.UFR_forward()
+            r20 = zerocurve.loc[20]/100
+            for h in range(1,41):
+                UFR = UFR_curve.loc[h].values.flatten()[0]/100
+                new_rate = ((UFR+1)*(1+r20)**20)**(1/(h+20))-1
+                zerocurve.loc[h+20] = new_rate*100
+            return zerocurve
     
     def UFR_forward(self):
         """Obtain the UFR curve using the convergence equation"""

@@ -68,3 +68,12 @@ def plot_zcs(df_swap,ZC, df_zerocurve,fname=None):
     if fname:
         plt.savefig(fname,bbox_inches='tight')
     plt.show()
+
+
+def plot_both_ratecurves(ZC_long_convergence, ZC_long_extrapolate):
+    plt.plot(ZC_long_convergence,label='convergence')
+    plt.plot(ZC_long_extrapolate, label='extrapolate')
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('UFR forward rate [%]')
+    plt.legend(frameon=1)
+    plt.show()

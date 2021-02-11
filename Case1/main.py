@@ -57,8 +57,28 @@ ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
 
 
 # Q2: Liability Hedging
-LH = LiabHedger(df_cashflows)
-print('Modified DV01 (in millions): ',np.round(1e-6*LH.ModDV01()[1],2))
-print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH.ModDV01()[0].loc[[10,20,30]],2))
-print('Modified Duration (in years): ',np.round(LH.modDur()[1],2))
-print('Contributions to ModDur (in years): ',LH.modDur()[0].loc[[10,20,30]])
+LH1 = LiabHedger(df_cashflows)
+PV1 = LH1.present_day_value()
+print('Present day value of liabilities',PV1)
+ModDV01_1 = LH1.ModDV01()[1]
+print('Modified DV01 (in millions): ',np.round(1e-6*ModDV01_1,2))
+print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH1.ModDV01()[0].loc[[10,20,30]],2))
+ModDur1_1 = LH1.modDur()[1]
+print('Modified Duration (in years): ',np.round(ModDur1_1,2))
+print('Contributions to ModDur (in years): ',LH1.modDur()[0].loc[[10,20,30]])
+
+# Now add a shock of 0.5% to the zerocurve
+df_cashflows['zerorate'] = df_cashflows['zerorate'] -0.5
+LH2 = LiabHedger(df_cashflows)
+PV2 = LH2.present_day_value()
+print('Present day value of liabilities',LH2.present_day_value())
+ModDV01_2 = LH2.ModDV01()[1]
+print('Modified DV01 (in millions): ',np.round(1e-6*ModDV01_2,2))
+print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH2.ModDV01()[0].loc[[10,20,30]],2))
+ModDur2 = LH2.modDur()[1]
+print('Modified Duration (in years): ',np.round(ModDur2,2))
+print('Contributions to ModDur (in years): ',LH2.modDur()[0].loc[[10,20,30]])
+
+
+print('Liabilities went from ', np.round(1e-9*PV1, 2), ' billion to ',np.round(1e-9*PV2, 2), 'billion')
+print('Modified DV01 went from ', np.round(1e-6*ModDV01_1, 2), ' million to ',np.round(1e-6*ModDV01_2, 2), 'million')

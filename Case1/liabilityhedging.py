@@ -17,6 +17,12 @@ class LiabHedger():
     def __init__(self, df):
         """Initialization of Liability Hedging class"""
         self.df = df
+
+    def present_day_value(self):
+        PV = 0
+        for maturity, row in self.df.iterrows():
+            PV += row.cashflow * (1/((1+row.zerorate/100)**maturity))
+        return PV
     
     def ModDV01(self):
         """Obtain the modified DV01 by iterating over the cashflows"""
@@ -31,7 +37,7 @@ class LiabHedger():
 
     def modDur(self):
         """Obtain modified duration from ModDV01 and current value of cashflows"""
-        curval_cashflows = 22773412004 #Given
+        curval_cashflows = self.present_day_value()
         # Get Modified DV01 from other function
         contrib_df_dv01, moddv01 = self.ModDV01()
         contrib_df_dur = pd.DataFrame({'Year':[],'Contribution':[]}).set_index('Year')

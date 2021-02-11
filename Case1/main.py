@@ -17,7 +17,7 @@ import numpy as np
 from datalib import get_data
 from plottinglib import *
 from termstructure import bootstrap
-from liabilityhedging import LiabHedger
+from liabilityhedging import LiabHedger, modDV01_swap
 
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
@@ -66,6 +66,10 @@ print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH1.ModDV01()[0].
 ModDur1_1 = LH1.modDur()[1]
 print('Modified Duration (in years): ',np.round(ModDur1_1,2))
 print('Contributions to ModDur (in years): ',LH1.modDur()[0].loc[[10,20,30]])
+ModConv1 = LH1.ModConv()[1]
+print('Modified Duration (in years): ',np.round(ModConv1,2))
+print('Contributions to ModDur (in years): ',LH1.ModConv()[0].loc[[10,20,30]])
+
 
 # Now add a shock of 0.5% to the zerocurve
 df_cashflows['zerorate'] = df_cashflows['zerorate'] -0.5
@@ -78,7 +82,22 @@ print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH2.ModDV01()[0].
 ModDur2 = LH2.modDur()[1]
 print('Modified Duration (in years): ',np.round(ModDur2,2))
 print('Contributions to ModDur (in years): ',LH2.modDur()[0].loc[[10,20,30]])
-
+ModConv2 = LH2.ModConv()[1]
+print('Modified Duration (in years): ',np.round(ModConv2,2))
+print('Contributions to ModDur (in years): ',LH2.ModConv()[0].loc[[10,20,30]])
 
 print('Liabilities went from ', np.round(1e-9*PV1, 2), ' billion to ',np.round(1e-9*PV2, 2), 'billion')
 print('Modified DV01 went from ', np.round(1e-6*ModDV01_1, 2), ' million to ',np.round(1e-6*ModDV01_2, 2), 'million')
+print('Modified convexity went from ', np.round(1e-6*ModConv1, 2), ' million to ',np.round(1e-6*ModConv2, 2), 'million')
+
+# Q2c: Get DV01 for 30yr swap contract
+swap30 = 0.3756/100
+zero  = ZC.loc[1].iloc[0]/100
+print(modDV01_swap(swap30, zero))
+# Note: value is not yet right!
+
+# Q2d: get amount of DV01 needed
+to_hedge = PV1 - PV2
+DV01_needed = np.abs((to_hedge/50)/(0.002726))
+print('We need (billion DV01)', np.round(DV01_needed*1e-9,3))
+

@@ -35,6 +35,16 @@ class LiabHedger():
             contrib_df.loc[maturity] = new_value
         return contrib_df, moddv01
 
+    def ModConv(self):
+        """Obtain the modified DV01 by iterating over the cashflows"""
+        modconvex = 0
+        contrib_df = pd.DataFrame({'Year':[],'Contribution':[]}).set_index('Year')
+        for maturity, row in self.df.iterrows():
+            new_value = 1e-4*(maturity**2+maturity) * row.cashflow / (((1+row.zerorate/100)**maturity)**2)
+            modconvex += new_value
+            contrib_df.loc[maturity] = new_value
+        return contrib_df, modconvex
+
     def modDur(self):
         """Obtain modified duration from ModDV01 and current value of cashflows"""
         curval_cashflows = self.present_day_value()
@@ -53,3 +63,20 @@ class LiabHedger():
             contribution = moddur_value - sub_dur #(years)
             contrib_df_dur.loc[year] = contribution
         return contrib_df_dur, moddur_value
+
+
+def modDV01_swap(swaprate, zerorate):
+    zerorate2  = zerorate-1e-4
+
+    # Swap value = float minus fix
+
+    float1 = zerorate/(1+zerorate)
+    fix1 = swaprate * np.sum([1/((1+zerorate)**w) for w in range(1,31)])
+
+    float2 = zerorate2/(1+zerorate2)
+    fix2 = swaprate * np.sum([1/((1+zerorate2)**w) for w in range(1,31)])
+
+    swap1 = float1 - fix1
+    swap2 = float2 - fix2
+
+    return (swap2-swap1)/swap2*100

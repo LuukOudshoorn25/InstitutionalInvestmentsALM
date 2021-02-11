@@ -68,3 +68,29 @@ class bootstrap():
         df['diff'] = df['Zero rate'] - df['zerorate']
         df = df.fillna('-')
         return df
+
+    def forward_rate(self,t1=19,t2=20):
+        """Calculate the forward rate from two spot rates and two times"""
+        # Obtain discount factors
+        zerocurve = self.get_zerocurve()
+        r1 = zerocurve.loc[t1]
+        r2 = zerocurve.loc[t2]
+        discount1 = (1+r1.iloc[0]/100)**t1
+        discount2 = (1+r2.iloc[0]/100)**t2
+        
+        f12 = (discount2/discount1)-1
+        f12 = f12*100
+        return f12
+
+    def UFR(self):
+        # Get UFR rate
+        UFR = self.forward_rate(19,20)/100
+        # Get zerocurve
+        zerocurve = self.get_zerocurve()
+        # From 20 years onward, we consider the UFR as forward rate for each consecutive year
+        # Add elements to zerocurve
+        for year in range(21,61):
+            new_rate = ((UFR+1)*(1+zerocurve.loc[year-1]/100)**(year-1))**(1/year)-1
+            zerocurve.loc[year] = new_rate*100
+        return zerocurve
+    

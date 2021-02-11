@@ -10,8 +10,19 @@ def plot_swaprates(df_swap):
     plt.tight_layout()
     plt.show()
 
+def plot_URF(ZC,fname=None):
+    xnew = np.arange(1,len(ZC),0.01)
+    f1 = interp1d(ZC.index, ZC['Zero rate'], kind='quadratic')
+    plt.plot(xnew, f1(xnew), lw=1,color='black')
+    plt.scatter(ZC.index, ZC['Zero rate'],color='dodgerblue',s=3)
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('Zerorate [%]')
+    plt.tight_layout()
+    if fname:
+        plt.savefig(fname)
+    plt.show()
 
-def plot_zcs(df_swap,ZC, df_zerocurve):
+def plot_zcs(df_swap,ZC, df_zerocurve,fname=None):
     # Obtain difference between swap and zero rate to enhance plotting
     diff = pd.merge(df_swap,ZC,left_index=True,right_index=True)
     diff['diff'] = 100*(diff['Zero rate'] - diff['swaprate'])
@@ -42,5 +53,6 @@ def plot_zcs(df_swap,ZC, df_zerocurve):
     a1.set_ylabel(r'$\Delta\,r$ (bp)')
     a1.set_xlabel('Time [yr]')
     plt.tight_layout(pad=-0.5)
-    plt.savefig('zerorates.pdf',bbox_inches='tight')
+    if fname:
+        plt.savefig(fname,bbox_inches='tight')
     plt.show()

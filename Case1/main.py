@@ -32,8 +32,13 @@ ZC = BS.get_zerocurve()
 merged = BS.merge(df_zerocurve)
 
 # Plot the obtained zerocurve together with Mark-Jan's zero curve and the swapcurve
-plot_zcs(df_swap,ZC, df_zerocurve)
+#plot_zcs(df_swap,ZC, df_zerocurve,fname='zerocurve.pdf')
 
+# Calculate the forward rate from 19 to 20 years
+f19_20 = BS.forward_rate()
+print('Forward rate from 19 to 20 years (in %): ',np.round(f19_20,3))
 
-
-
+# Now do the ultimate forward zerocurve projection
+ZC = BS.UFR()
+print(ZC.loc[[21,40,60]])
+#plot_URF(ZC)

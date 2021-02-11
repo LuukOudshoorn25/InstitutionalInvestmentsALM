@@ -96,7 +96,7 @@ zero  = ZC.loc[1].iloc[0]/100
 print(modDV01_swap(swap30, zero))
 # Note: value is not yet right!
 
-# Q2d: get amount of DV01 needed
+# Q2c: get amount of DV01 needed
 to_hedge = PV1 - PV2
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion DV01)', np.round(DV01_needed*1e-9,3))

@@ -16,7 +16,7 @@ import numpy as np
 # Import functios from other files
 from datalib import get_data
 from plottinglib import *
-from zerocurve import bootstrap
+from termstructure import bootstrap
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
 
@@ -39,6 +39,11 @@ f19_20 = BS.forward_rate()
 print('Forward rate from 19 to 20 years (in %): ',np.round(f19_20,3))
 
 # Now do the ultimate forward zerocurve projection
-ZC = BS.UFR()
+ZC = BS.UFR_zerocurve()
 print(ZC.loc[[21,40,60]])
-#plot_URF(ZC)
+#plot_UFR(ZC)
+
+# Now obtain ultimate forward curve
+BS = bootstrap(df_swap)
+UFR_forward_curve = BS.UFR_forward()
+plot_UFR_fc(UFR_forward_curve)

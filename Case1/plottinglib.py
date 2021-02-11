@@ -10,13 +10,25 @@ def plot_swaprates(df_swap):
     plt.tight_layout()
     plt.show()
 
-def plot_URF(ZC,fname=None):
+def plot_UFR(ZC,fname=None):
     xnew = np.arange(1,len(ZC),0.01)
     f1 = interp1d(ZC.index, ZC['Zero rate'], kind='quadratic')
     plt.plot(xnew, f1(xnew), lw=1,color='black')
     plt.scatter(ZC.index, ZC['Zero rate'],color='dodgerblue',s=3)
     plt.xlabel('Maturity [years]')
     plt.ylabel('Zerorate [%]')
+    plt.tight_layout()
+    if fname:
+        plt.savefig(fname)
+    plt.show()
+
+def plot_UFR_fc(df,fname=None):
+    xnew = np.arange(1,len(df),0.01)
+    f1 = interp1d(df.index, df['URF_forward'], kind='quadratic')
+    plt.plot(xnew, f1(xnew), lw=1,color='black')
+    plt.scatter(df.index, df['URF_forward'],color='dodgerblue',s=3)
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('UFR forward rate [%]')
     plt.tight_layout()
     if fname:
         plt.savefig(fname)

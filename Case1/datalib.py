@@ -1,3 +1,14 @@
+###############################################
+###                                         ###
+###      Subfile for the Instit Invest.     ###
+###        and ALM Case 1 assignment        ###
+###               Luuk Oudshoorn            ###
+###            Willem-Jan de Voogd          ###
+###                Mees Tierolf             ###
+###      All quantitative  (Fin. Econ)      ###
+###                                         ###
+###############################################
+
 # Import some of the standard packages
 import pandas as pd
 import numpy as np
@@ -9,5 +20,5 @@ def get_data():
     df_swap.columns = ['name','swaprate']
     df_zerocurve = pd.read_csv('./Q1_zerocurve.csv').set_index('maturity')
     df_cashflows = pd.read_csv('./Q2_cashflows.csv').set_index('maturity')
-
+    df_cashflows['cashflow']*=1000
     return df_swap, df_zerocurve, df_cashflows

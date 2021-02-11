@@ -1,3 +1,14 @@
+###############################################
+###                                         ###
+###      Subfile for the Instit Invest.     ###
+###        and ALM Case 1 assignment        ###
+###               Luuk Oudshoorn            ###
+###            Willem-Jan de Voogd          ###
+###                Mees Tierolf             ###
+###      All quantitative  (Fin. Econ)      ###
+###                                         ###
+###############################################
+ 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np

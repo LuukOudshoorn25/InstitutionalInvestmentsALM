@@ -17,6 +17,8 @@ import numpy as np
 from datalib import get_data
 from plottinglib import *
 from termstructure import bootstrap
+from liabilityhedging import LiabHedger
+
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
 
@@ -51,4 +53,12 @@ print(UFR_forward_curve.loc[[1,10,30,50]])
 
 # Now do the ultimate forward zerocurve with convergence numbers
 ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
-plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate)
+#plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate)
+
+
+# Q2: Liability Hedging
+LH = LiabHedger(df_cashflows)
+print('Modified DV01 (in millions): ',np.round(1e-6*LH.ModDV01()[1],2))
+print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH.ModDV01()[0].loc[[10,20,30]],2))
+print('Modified Duration (in years): ',np.round(LH.modDur()[1],2))
+print('Contributions to ModDur (in years): ',LH.modDur()[0].loc[[10,20,30]])

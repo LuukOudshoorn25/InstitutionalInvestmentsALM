@@ -1,3 +1,14 @@
+###############################################
+###                                         ###
+###      Subfile for the Instit Invest.     ###
+###        and ALM Case 1 assignment        ###
+###               Luuk Oudshoorn            ###
+###            Willem-Jan de Voogd          ###
+###                Mees Tierolf             ###
+###      All quantitative  (Fin. Econ)      ###
+###                                         ###
+###############################################
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -112,9 +123,6 @@ class bootstrap():
         zerocurve = self.get_zerocurve()
         # Get forward rates for the known data
         f_UFR = pd.DataFrame({'h':[], 'URF_forward':[]}).set_index('h')
-        #for year in range(1,len(zerocurve)+1):
-        #    frate = self.forward_rate(t1=1, t2=year)
-        #    f_UFR.loc[year] = frate
         # Define out-of-sample function
         B = lambda h: (1-np.exp(-0.5*h))/(0.5*h)
         f = lambda x,h: 4.2+(x-4.2)*B(h)            

@@ -42,18 +42,18 @@ print('Forward rate from 19 to 20 years (in %): ',np.round(f19_20,3))
 
 # Now do the ultimate forward zerocurve projection
 ZC_long_extrapolate = BS.UFR_zerocurve()
-print(ZC.loc[[21,40,60]])
-#plot_UFR(ZC)
+print(ZC.loc[[21,40,60]].round(2).to_latex(bold_rows=True))
+#plot_UFR(ZC, 'UFR.pdf')
 
 # Now obtain ultimate forward curve
 BS = bootstrap(df_swap)
 UFR_forward_curve = BS.UFR_forward()
-print(UFR_forward_curve.loc[[1,10,30,50]])
-#plot_UFR_fc(UFR_forward_curve)
+print(UFR_forward_curve.loc[[1,10,30,50]].round(2).to_latex(bold_rows=True))
+#plot_UFR_fc(UFR_forward_curve, 'UFR_convergence.pdf')
 
 # Now do the ultimate forward zerocurve with convergence numbers
 ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
-#plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate)
+plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate, 'both_longmaturity.pdf')
 
 
 # Q2: Liability Hedging
@@ -101,3 +101,6 @@ to_hedge = PV1 - PV2
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion DV01)', np.round(DV01_needed*1e-9,3))
 
+
+
+# Q4: Vasicek-model

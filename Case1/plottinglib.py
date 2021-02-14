@@ -24,11 +24,14 @@ def plot_swaprates(df_swap):
 def plot_UFR(ZC,fname=None):
     xnew = np.arange(1,len(ZC),0.01)
     f1 = interp1d(ZC.index, ZC['Zero rate'], kind='quadratic')
-    plt.plot(xnew, f1(xnew), lw=1,color='black')
-    plt.scatter(ZC.index, ZC['Zero rate'],color='dodgerblue',s=3)
+    
+    plt.scatter(ZC.index, ZC['Zero rate'],color='dodgerblue',s=6,label='UFR projected zero-rate')
+    plt.plot(xnew, f1(xnew), lw=1,color='black', label='Interpolated zero-curve')
     plt.xlabel('Maturity [years]')
     plt.ylabel('Zerorate [%]')
     plt.tight_layout()
+    plt.axhline(0,ls='--',lw=0.5,color='black')
+    plt.legend(loc='upper left', frameon=1)
     if fname:
         plt.savefig(fname)
     plt.show()
@@ -37,10 +40,11 @@ def plot_UFR_fc(df,fname=None):
     xnew = np.arange(1,len(df),0.01)
     f1 = interp1d(df.index, df['URF_forward'], kind='quadratic')
     plt.plot(xnew, f1(xnew), lw=1,color='black')
-    plt.scatter(df.index, df['URF_forward'],color='dodgerblue',s=3)
-    plt.xlabel('Maturity [years]')
-    plt.ylabel('UFR forward rate [%]')
+    plt.scatter(df.index, df['URF_forward'],color='dodgerblue',s=6)
+    plt.xlabel('h [years]')
+    plt.ylabel('Forward rate [%]')
     plt.tight_layout()
+    plt.axhline(4.2,ls='--',lw=0.5,color='black')
     if fname:
         plt.savefig(fname)
     plt.show()
@@ -52,9 +56,9 @@ def plot_zcs(df_swap,ZC, df_zerocurve,fname=None):
 
     xnew = np.arange(1,20,0.01)
 
-    fig, (a0, a1) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [3, 1]},figsize=(6,4),sharex=True)
+    fig, (a0, a1) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [3, 1]},figsize=(3.321,3.5),sharex=True)
     #a0.plot(df_swap.index, df_swap.swaprate,color='black',lw=1, ls='--', label='Swap rates')
-    a0.scatter(df_zerocurve.index, df_zerocurve, s=5,color='dodgerblue',label='Mark-Jan zerocurve')
+    a0.scatter(df_zerocurve.index, df_zerocurve, s=15,color='dodgerblue',label='Mark-Jan zerocurve')
     # Do some spline interpolation
     f1 = interp1d(df_swap.index, df_swap.swaprate, kind='quadratic')
     a0.plot(xnew, f1(xnew),color='black',lw=1, ls='--', label='Swap rates')
@@ -62,7 +66,7 @@ def plot_zcs(df_swap,ZC, df_zerocurve,fname=None):
     f2 = interp1d(ZC.index, ZC['Zero rate'], kind='quadratic')
     #a0.plot(ZC.index, ZC['Zero rate'],color='black',lw=1, label='Zero rate')
     a0.plot(xnew, f2(xnew),color='black',lw=1, label='Zero rate')
-    
+    print('Maturity for zero rate = 0',xnew[np.argmin(np.abs(f2(xnew)))])
     f3 = interp1d(diff.index, diff['diff'], kind='quadratic')
     #a1.plot(diff.index, diff['diff'],color='black',lw=1, label='Zero rate - swap rate')
     a1.plot(xnew, f3(xnew),color='black',lw=1, label='Zero rate - swap rate')
@@ -81,10 +85,20 @@ def plot_zcs(df_swap,ZC, df_zerocurve,fname=None):
     plt.show()
 
 
-def plot_both_ratecurves(ZC_long_convergence, ZC_long_extrapolate):
-    plt.plot(ZC_long_convergence,label='convergence')
-    plt.plot(ZC_long_extrapolate, label='extrapolate')
+def plot_both_ratecurves(ZC_long_convergence, ZC_long_extrapolate,fname=None):
+    fig, ax = plt.subplots(1)
+    xnew = np.arange(1,60,0.01)
+    f1 = interp1d(ZC_long_convergence.index, ZC_long_convergence.values.flatten(), kind='quadratic')
+    ax.plot(xnew, f1(xnew),color='black',lw=1, ls='--', label='UFR Convergence')
+
+    f2 = interp1d(ZC_long_extrapolate.index, ZC_long_extrapolate.values.flatten(), kind='quadratic')
+    ax.plot(xnew, f2(xnew),color='black',lw=1, label='UFR 19-20')
+    
     plt.xlabel('Maturity [years]')
-    plt.ylabel('UFR forward rate [%]')
+    plt.ylabel('Zero-rate [%]')
     plt.legend(frameon=1)
+    ax.axhline(0,ls='--',lw=0.5,color='black')
+    plt.tight_layout()
+    if fname:
+        plt.savefig(fname,bbox_inches='tight')
     plt.show()

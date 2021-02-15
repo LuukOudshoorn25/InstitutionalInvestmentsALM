@@ -102,3 +102,28 @@ def plot_both_ratecurves(ZC_long_convergence, ZC_long_extrapolate,fname=None):
     if fname:
         plt.savefig(fname,bbox_inches='tight')
     plt.show()
+
+
+def plot_cashflows(df):
+    plt.bar(df.index, df.cashflow/1e6,color='black')
+    plt.tight_layout()
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('Cashflow [million EUR]')
+    plt.tight_layout()
+    plt.savefig('cashflowprofile.pdf')
+    plt.show()
+
+def plot_Q2_zerocurves(rates1,rates2, rates3, label1, label2, label3):
+    times = np.arange(0,len(rates3))
+    fig, ax=plt.subplots(1)
+    ax.plot(times, rates1,color='black',lw=1,label=label1)
+    ax.plot(times, rates2,ls='--',color='black',lw=1,label=label2)
+    ax.plot(times, rates3,ls='dotted',color='black',lw=1,label=label3)
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.axhline(0,ls='--',lw=0.5,color='black')
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('Zero rate [%]')
+    plt.savefig('allzerocurvesQ2.pdf', bbox_inches='tight')
+    plt.show()
+

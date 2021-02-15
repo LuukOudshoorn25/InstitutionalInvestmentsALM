@@ -40,7 +40,7 @@ class LiabHedger():
         modconvex = 0
         contrib_df = pd.DataFrame({'Year':[],'Contribution':[]}).set_index('Year')
         for maturity, row in self.df.iterrows():
-            new_value = 1e-4*(maturity**2+maturity) * row.cashflow / (((1+row.zerorate/100)**maturity)**2)
+            new_value = 1e-4*(maturity**2+maturity) * row.cashflow / (((1+row.zerorate/100)**maturity)**2)/100
             modconvex += new_value
             contrib_df.loc[maturity] = new_value
         return contrib_df, modconvex

@@ -18,10 +18,10 @@ from datalib import get_data
 from plottinglib import *
 from termstructure import bootstrap
 from liabilityhedging import LiabHedger, modDV01_swap
-
+from vasicek import vasicek
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
-
+"""
 # Q1: Term structure of interest rates
 # Let us first plot the swap rates as function of maturity
 #plot_swaprates(df_swap)
@@ -53,10 +53,12 @@ print(UFR_forward_curve.loc[[1,10,30,50]].round(2).to_latex(bold_rows=True))
 
 # Now do the ultimate forward zerocurve with convergence numbers
 ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
-plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate, 'both_longmaturity.pdf')
+#plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate, 'both_longmaturity.pdf')
 
 
 # Q2: Liability Hedging
+
+#plot_cashflows(df_cashflows)
 LH1 = LiabHedger(df_cashflows)
 PV1 = LH1.present_day_value()
 print('Present day value of liabilities',PV1)
@@ -68,8 +70,12 @@ print('Modified Duration (in years): ',np.round(ModDur1_1,2))
 print('Contributions to ModDur (in years): ',LH1.modDur()[0].loc[[10,20,30]])
 ModConv1 = LH1.ModConv()[1]
 print('Modified Duration (in years): ',np.round(ModConv1,2))
-print('Contributions to ModDur (in years): ',LH1.ModConv()[0].loc[[10,20,30]])
+print('Contributions to ModConv (in years): ',LH1.ModConv()[0].loc[[10,20,30]])
 
+# Plot all zerocurves for this question in one plot
+print(df_cashflows)
+#plot_Q2_zerocurves(df_cashflows['zerorate'], df_cashflows['zerorate']-0.5, df_cashflows['zerorate']+df_cashflows['deltazerorate'],
+#                   'Unshocked zero rates', 'Shock 1', 'Shock 2')
 
 # Now add a shock of 0.5% to the zerocurve
 df_cashflows['zerorate'] = df_cashflows['zerorate'] -0.5
@@ -100,7 +106,9 @@ print(modDV01_swap(swap30, zero))
 to_hedge = PV1 - PV2
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion DV01)', np.round(DV01_needed*1e-9,3))
-
+"""
 
 
 # Q4: Vasicek-model
+VS = vasicek()
+lambda_ = VS.find_lambda()

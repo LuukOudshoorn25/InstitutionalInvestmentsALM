@@ -38,11 +38,14 @@ class LiabHedger():
     def ModConv(self):
         """Obtain the modified DV01 by iterating over the cashflows"""
         modconvex = 0
+        PV = self.present_day_value()
         contrib_df = pd.DataFrame({'Year':[],'Contribution':[]}).set_index('Year')
         for maturity, row in self.df.iterrows():
-            new_value = 1e-4*(maturity**2+maturity) * row.cashflow / (((1+row.zerorate/100)**maturity)**2)/100
-            modconvex += new_value
-            contrib_df.loc[maturity] = new_value
+            pre = 100*(maturity**2 + maturity)/(1+row.zerorate/100)**2
+            upper = row.cashflow / ((1+row.zerorate/100)**maturity)
+            lower = PV
+            modconvex += pre*upper/lower
+            contrib_df.loc[maturity] = pre*upper/lower
         return contrib_df, modconvex
 
     def modDur(self):
@@ -66,17 +69,22 @@ class LiabHedger():
 
 
 def modDV01_swap(swaprate, zerorate):
-    zerorate2  = zerorate-1e-4
-
-    # Swap value = float minus fix
-
-    float1 = zerorate/(1+zerorate)
-    fix1 = swaprate * np.sum([1/((1+zerorate)**w) for w in range(1,31)])
-
-    float2 = zerorate2/(1+zerorate2)
-    fix2 = swaprate * np.sum([1/((1+zerorate2)**w) for w in range(1,31)])
-
-    swap1 = float1 - fix1
-    swap2 = float2 - fix2
-
-    return (swap2-swap1)/swap2*100
+    """Get modified DV01 for 30 year swap"""
+    # Calculate the ModDV01 of the fixed lag 
+    k = swaprate/100
+    zerorate = zerorate.values.flatten()
+    #zerorate = [0.2,0.35,0.804]
+    #k=0.008
+    fixed=0
+    for i in range(0,30):
+        T = i+1
+        disc_factor = (1+zerorate[i]/100)
+        upper = (k/disc_factor) * T
+        lower = 1e4 * disc_factor
+        fixed += upper/lower
+    print(100*fixed)
+    #Calculate ModDV01 for floating lag
+    floating = (0.002/(1+zerorate[0]/100)) / (10000*(1+zerorate[0]/100))
+    print(100*floating)
+    print(100*(fixed-floating))
+    return 100*(fixed-floating)

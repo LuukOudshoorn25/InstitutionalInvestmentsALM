@@ -92,14 +92,15 @@ print('Total contribution of DV01 and Convexity is ',np.round(1e-9*ModDV01_1*50+
 # Q2c: Get DV01 for 30yr swap contract
 df_swap, df_zerocurve, df_cashflows = get_data()
 swap30 = 0.3756
-#modDV01_swap(swap30,  df_cashflows['zerorate'] )
+swap_DV01 = modDV01_swap(swap30,  df_cashflows['zerorate'] )
+print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
 # Note: value is not yet right!
-"""
+
 # Q2c: get amount of DV01 needed
 to_hedge = PV1 - PV2
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
-print('We need (billion DV01)', np.round(DV01_needed*1e-9,3))
-"""
+print('We need (billion)', np.round(DV01_needed*1e-9,3))
+
 
 
 # Q4: Vasicek-model

@@ -79,12 +79,14 @@ def modDV01_swap(swaprate, zerorate):
     for i in range(0,30):
         T = i+1
         disc_factor = (1+zerorate[i]/100)
-        upper = (k/disc_factor) * T
+        # Intermediate payments
+        upper = (k/disc_factor**T) * T
         lower = 1e4 * disc_factor
         fixed += upper/lower
-    print(100*fixed)
+    # Last payment of notional
+    upper = (1/disc_factor**T) * T
+    lower = 1e4 * disc_factor
+    fixed += upper/lower
     #Calculate ModDV01 for floating lag
-    floating = (0.002/(1+zerorate[0]/100)) / (10000*(1+zerorate[0]/100))
-    print(100*floating)
-    print(100*(fixed-floating))
+    floating = ((zerorate[0]/100+1)/(1+zerorate[0]/100)) / (10000*(1+zerorate[0]/100))
     return 100*(fixed-floating)

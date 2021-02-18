@@ -90,3 +90,12 @@ def modDV01_swap(swaprate, zerorate):
     #Calculate ModDV01 for floating lag
     floating = ((zerorate[0]/100+1)/(1+zerorate[0]/100)) / (10000*(1+zerorate[0]/100))
     return 100*(fixed-floating)
+
+def modDV01_bond(rate, N):
+    zerorate=rate/100
+    k=rate/100
+    T=1
+    disc_factor = (1+zerorate/100)
+    upper = ((1+k)/disc_factor**T) * T
+    lower = 1e4 * disc_factor
+    return N*upper/lower

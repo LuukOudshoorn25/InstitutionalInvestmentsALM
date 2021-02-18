@@ -17,7 +17,7 @@ import numpy as np
 from datalib import get_data
 from plottinglib import *
 from termstructure import bootstrap
-from liabilityhedging import LiabHedger, modDV01_swap
+from liabilityhedging import LiabHedger, modDV01_swap,modDV01_bond
 from vasicek import vasicek
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
@@ -61,6 +61,11 @@ ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
 #plot_cashflows(df_cashflows)
 LH1 = LiabHedger(df_cashflows)
 PV1 = LH1.present_day_value()
+assets = 1.15*PV1
+print('Total assets ', np.round(1e-9*assets,4))
+modDV01_assets = modDV01_bond(-0.52,assets)
+print('ModDV01 of assets ', np.round(1e-6*modDV01_assets,4))
+
 print('Present day value of liabilities',PV1)
 ModDV01_1 = LH1.ModDV01()[1]
 print('Modified DV01 (in millions): ',np.round(1e-6*ModDV01_1,2))
@@ -97,7 +102,7 @@ print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
 # Note: value is not yet right!
 
 # Q2c: get amount of DV01 needed
-to_hedge = PV1 - PV2
+to_hedge = PV1 - PV2 + 50*modDV01_assets
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion)', np.round(DV01_needed*1e-9,3))
 

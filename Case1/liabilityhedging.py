@@ -102,3 +102,21 @@ def modDV01_bond(rate, N):
     lower = 1e4 * disc_factor
     # Multiply times notional to get DV01 of cash investment
     return N*upper/lower
+
+def swapvalue(swaprate, zerocurve, maturity,notional):
+    zerocurve = zerocurve.values.flatten()
+    # Fixed leg, ie annual payments
+    Vfixed = 0
+    for i in range(maturity):
+        # payout is one year ahead
+        T = i+1
+        # payment 
+        discount = (1+zerocurve[i]/100)**T
+        Vfixed += (swaprate/100) / discount
+    # And final payment of the notional
+    Vfixed += 1/(1+zerocurve[-1]/100)**maturity
+
+    # floating leg
+    Vfloat = (1+zerocurve[0]/100) / ((1+zerocurve[0]/100))
+    swapvalue = Vfixed - Vfloat
+    return swapvalue*notional

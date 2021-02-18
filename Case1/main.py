@@ -17,7 +17,7 @@ import numpy as np
 from datalib import get_data
 from plottinglib import *
 from termstructure import bootstrap
-from liabilityhedging import LiabHedger, modDV01_swap,modDV01_bond
+from liabilityhedging import LiabHedger, modDV01_swap,modDV01_bond,swapvalue
 from vasicek import vasicek
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
@@ -106,7 +106,20 @@ to_hedge = PV1 - PV2 + 50*modDV01_assets
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion)', np.round(DV01_needed*1e-9,3))
 
-
+#Q2d
+# Refresh data
+df_swap, df_zerocurve, df_cashflows = get_data()
+# set shock
+df_cashflows['zerorate'] = df_cashflows['zerorate'] + df_cashflows['deltazerorate']
+print(df_cashflows)
+LH3 = LiabHedger(df_cashflows)
+print('Present value of liabilities is ',LH3.present_day_value())
+# Get value of the swap
+swapval = swapvalue(0.3756, df_cashflows['zerorate'], 30, DV01_needed)
+print('Value of swap changed to ', np.round(1e-6*swapval,3), ' million')
+newassets = assets + swapval
+print('New total assets ',newassets)
+print('New FR ',100*newassets/LH3.present_day_value())
 
 # Q4: Vasicek-model
 #VS = vasicek()

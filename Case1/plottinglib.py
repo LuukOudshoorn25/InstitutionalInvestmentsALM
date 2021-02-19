@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
-plt.style.use('../MNRAS_stylesheet')
+plt.style.use('MNRAS_stylesheet')
 def plot_swaprates(df_swap):
     plt.plot(df_swap.index, df_swap.swaprate,color='black',lw=1)
     plt.xlabel('Maturity [years]')

@@ -78,7 +78,7 @@ def modDV01_swap(swaprate, zerorate):
     fixed=0
     for i in range(0,30):
         T = i+1
-        disc_factor = (1+zerorate[i]/100)
+        disc_factor = (1+zerorate[T]/100)
         # Intermediate payments
         upper = (k/disc_factor**T) * T
         lower = 1e4 * disc_factor

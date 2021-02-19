@@ -61,6 +61,7 @@ ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
 #plot_cashflows(df_cashflows)
 LH1 = LiabHedger(df_cashflows)
 PV1 = LH1.present_day_value()
+print(PV1)
 assets = 1.15*PV1
 print('Total assets ', np.round(1e-9*assets,4))
 modDV01_assets = modDV01_bond(-0.52,assets)
@@ -74,7 +75,7 @@ ModDur1_1 = LH1.modDur()[1]
 print('Modified Duration (in years): ',np.round(ModDur1_1,2))
 #print('Contributions to ModDur (in years): ',LH1.modDur()[0].loc[[10,20,30]])
 ModConv1 = LH1.ModConv()[1]
-print('Modified Convexity (in million euros): ',np.round(ModConv1,2))
+print('Modified x Convexity (in million euros): ',np.round(ModConv1,2))
 #print('Contributions to ModConv (in years): ',LH1.ModConv()[0].loc[[10,20,30]])
 
 # Plot all zerocurves for this question in one plot
@@ -101,6 +102,7 @@ print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
 
 # Q2c: get amount of DV01 needed
 to_hedge = PV1 - PV2 + 50*modDV01_assets
+print(',mod dv01 bond',modDV01_assets)
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion)', np.round(DV01_needed*1e-9,3))
 
@@ -122,3 +124,5 @@ print('New FR ',100*newassets/LH3.present_day_value())
 # Q4: Vasicek-model
 #VS = vasicek()
 #lambda_ = VS.find_lambda()
+
+#16.788

@@ -67,7 +67,6 @@ class LiabHedger():
             contrib_df_dur.loc[year] = contribution
         return contrib_df_dur, moddur_value
 
-
 def modDV01_swap(swaprate, zerorate):
     """Get modified DV01 for 30 year swap"""
     # Calculate the ModDV01 of the fixed lag 
@@ -103,17 +102,17 @@ def modDV01_bond(rate, N):
 
 def swapvalue(swaprate, zerocurve, maturity,notional):
     zerocurve = zerocurve.values.flatten()
+    print(len(zerocurve))
     # Fixed leg, ie annual payments
     Vfixed = 0
-    for i in range(maturity):
+    for i in range(1,maturity+1):
         # payout is one year ahead
-        T = i+1
-        # payment 
-        discount = (1+zerocurve[i]/100)**T
+        # payment
+        discount = (1+zerocurve[i]/100)**i
         Vfixed += (swaprate/100) / discount
     # And final payment of the notional
-    Vfixed += 1/(1+zerocurve[-1]/100)**maturity
-
+    Vfixed += 1/((1+zerocurve[30]/100)**maturity)
+    print(zerocurve[-1])
     # floating leg
     Vfloat = (1+zerocurve[0]/100) / ((1+zerocurve[0]/100))
     swapvalue = Vfixed - Vfloat

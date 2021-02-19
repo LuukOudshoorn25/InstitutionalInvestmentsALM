@@ -69,16 +69,15 @@ print('ModDV01 of assets ', np.round(1e-6*modDV01_assets,4))
 print('Present day value of liabilities',PV1)
 ModDV01_1 = LH1.ModDV01()[1]
 print('Modified DV01 (in millions): ',np.round(1e-6*ModDV01_1,2))
-print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH1.ModDV01()[0].loc[[10,20,30]],2))
+#print('Contributions to ModDV01 (in millions): ',np.round(1e-6*LH1.ModDV01()[0].loc[[10,20,30]],2))
 ModDur1_1 = LH1.modDur()[1]
 print('Modified Duration (in years): ',np.round(ModDur1_1,2))
-print('Contributions to ModDur (in years): ',LH1.modDur()[0].loc[[10,20,30]])
+#print('Contributions to ModDur (in years): ',LH1.modDur()[0].loc[[10,20,30]])
 ModConv1 = LH1.ModConv()[1]
-print('Modified Duration (in years): ',np.round(ModConv1,2))
-print('Contributions to ModConv (in years): ',LH1.ModConv()[0].loc[[10,20,30]])
+print('Modified Convexity (in million euros): ',np.round(ModConv1,2))
+#print('Contributions to ModConv (in years): ',LH1.ModConv()[0].loc[[10,20,30]])
 
 # Plot all zerocurves for this question in one plot
-print(df_cashflows)
 #plot_Q2_zerocurves(df_cashflows['zerorate'], df_cashflows['zerorate']-0.5, df_cashflows['zerorate']+df_cashflows['deltazerorate'],
 #                   'Unshocked zero rates', 'Shock 1', 'Shock 2')
 
@@ -91,15 +90,14 @@ print('Liabilities went from ', np.round(1e-9*PV1, 2), ' billion to ',np.round(1
 print('Liabilities increased by ',np.round(1e-9*PV2-1e-9*PV1, 2), ' billion')
 
 print('Modified DV01 contribution is ', np.round(1e-6*ModDV01_1*50, 2), ' million')
-print('Modified convexity contribution is ', np.round(1e-6*ModConv1*50, 2), ' million')
-print('Total contribution of DV01 and Convexity is ',np.round(1e-9*ModDV01_1*50+1e-9*ModConv1*50, 2), ' billion')
+print('Modified convexity contribution is ', np.round(1e-6*ModConv1*50**2, 2), ' million')
+print('Total contribution of DV01 and Convexity is ',np.round(1e-9*ModDV01_1*50+1e-9*ModConv1*50**2, 2), ' billion')
 
 # Q2c: Get DV01 for 30yr swap contract
 df_swap, df_zerocurve, df_cashflows = get_data()
 swap30 = 0.3756
-swap_DV01 = modDV01_swap(swap30,  df_cashflows['zerorate'] )
+swap_DV01 = modDV01_swap(swap30,  df_cashflows['zerorate'])
 print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
-# Note: value is not yet right!
 
 # Q2c: get amount of DV01 needed
 to_hedge = PV1 - PV2 + 50*modDV01_assets
@@ -111,7 +109,7 @@ print('We need (billion)', np.round(DV01_needed*1e-9,3))
 df_swap, df_zerocurve, df_cashflows = get_data()
 # set shock
 df_cashflows['zerorate'] = df_cashflows['zerorate'] + df_cashflows['deltazerorate']
-print(df_cashflows)
+
 LH3 = LiabHedger(df_cashflows)
 print('Present value of liabilities is ',LH3.present_day_value())
 # Get value of the swap

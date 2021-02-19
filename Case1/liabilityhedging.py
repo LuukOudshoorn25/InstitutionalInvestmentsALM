@@ -73,8 +73,6 @@ def modDV01_swap(swaprate, zerorate):
     # Calculate the ModDV01 of the fixed lag 
     k = swaprate/100
     zerorate = zerorate.values.flatten()
-    #zerorate = [0.2,0.35,0.804]
-    #k=0.008
     fixed=0
     for i in range(0,30):
         T = i+1
@@ -88,7 +86,7 @@ def modDV01_swap(swaprate, zerorate):
     lower = 1e4 * disc_factor
     fixed += upper/lower
     #Calculate ModDV01 for floating lag
-    floating = ((zerorate[0]/100+1)/(1+zerorate[0]/100)) / (10000*(1+zerorate[0]/100))
+    floating = ((zerorate[0]/100+1)/(1+zerorate[1]/100)) / (10000*(1+zerorate[1]/100))
     return 100*(fixed-floating)
 
 def modDV01_bond(rate, N):

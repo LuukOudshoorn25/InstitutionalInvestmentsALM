@@ -102,7 +102,6 @@ def modDV01_bond(rate, N):
 
 def swapvalue(swaprate, zerocurve, maturity,notional):
     zerocurve = zerocurve.values.flatten()
-    print(len(zerocurve))
     # Fixed leg, ie annual payments
     Vfixed = 0
     for i in range(1,maturity+1):
@@ -112,7 +111,6 @@ def swapvalue(swaprate, zerocurve, maturity,notional):
         Vfixed += (swaprate/100) / discount
     # And final payment of the notional
     Vfixed += 1/((1+zerocurve[30]/100)**maturity)
-    print(zerocurve[-1])
     # floating leg
     Vfloat = (1+zerocurve[0]/100) / ((1+zerocurve[0]/100))
     swapvalue = Vfixed - Vfloat

@@ -55,7 +55,7 @@ print(UFR_forward_curve.loc[[1,10,30,50]].round(2).to_latex(bold_rows=True))
 ZC_long_convergence = BS.UFR_zerocurve(mode='UFR_convergence')
 #plot_both_ratecurves(ZC_long_convergence,ZC_long_extrapolate, 'both_longmaturity.pdf')
 
-"""
+
 # Q2: Liability Hedging
 
 #plot_cashflows(df_cashflows)
@@ -102,7 +102,6 @@ print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
 
 # Q2c: get amount of DV01 needed
 to_hedge = PV1 - PV2 + 50*modDV01_assets
-print(',mod dv01 bond',modDV01_assets)
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion)', np.round(DV01_needed*1e-9,3))
 
@@ -120,9 +119,23 @@ print('Value of swap changed to ', np.round(1e-6*swapval,3), ' million')
 newassets = assets + swapval
 print('New total assets ',newassets)
 print('New FR ',100*newassets/LH3.present_day_value())
-
+"""
 # Q4: Vasicek-model
-#VS = vasicek()
+VS = vasicek()
 #lambda_ = VS.find_lambda()
+#print(lambda_)
+# Complete term structure of nominal interest rates
+VS.lambda_ = -0.53
+#zerorates = VS.termstructure()
+# Q4b: Apply zerorates to liabilities from Q2
+#_,_, df_cashflows = get_data()
+#df_cashflows['zerorate'] = zerorates*100
+#LH = LiabHedger(df_cashflows)
+#PV = LH.present_day_value()
+#print('Present value of liabilities in billions under Vasicek ',np.round(PV*1e-9,3))
+#plot_zerorates(df_cashflows, fname='Vasicek_termstructure.pdf')
+# Q4c: Resulting distribution after one year
+#final_rates = VS.one_year()
+#plot_oneyear_hist(100*final_rates)
 
-#16.788
+VS.matching()

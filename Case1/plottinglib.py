@@ -12,6 +12,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import seaborn as sns
 from scipy.interpolate import interp1d
 plt.style.use('MNRAS_stylesheet')
 def plot_swaprates(df_swap):
@@ -19,6 +20,16 @@ def plot_swaprates(df_swap):
     plt.xlabel('Maturity [years]')
     plt.ylabel('Swap rate [%]')
     plt.tight_layout()
+    plt.show()
+
+def plot_zerorates(df,fname=None):
+    plt.plot(df.index, df.zerorate,color='black',lw=1)
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('Zero rate [%]')
+    plt.axhline(0,ls='--',lw=0.5,color='black')
+    plt.tight_layout()
+    if fname:
+        plt.savefig(fname)
     plt.show()
 
 def plot_UFR(ZC,fname=None):
@@ -127,3 +138,14 @@ def plot_Q2_zerocurves(rates1,rates2, rates3, label1, label2, label3):
     plt.savefig('allzerocurvesQ2.pdf', bbox_inches='tight')
     plt.show()
 
+def plot_oneyear_hist(rates):
+    #plt.hist(rates, histtype='step',lw=1,color='black')
+    fig, ax = plt.subplots()
+    sns.distplot(rates, hist=True, bins=30, kde=True, color='dodgerblue',
+                hist_kws={'edgecolor': 'black'},
+                kde_kws={'linewidth': 0.7}, ax=ax)
+    plt.tight_layout()
+    plt.xlabel('One year interest rate [%]')
+    plt.ylabel('Density')
+    plt.savefig('Oneyearrates_vasicek.pdf',bbox_inches='tight')
+    plt.show()

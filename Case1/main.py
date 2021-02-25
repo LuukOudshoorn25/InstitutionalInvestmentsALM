@@ -32,7 +32,7 @@ BS = bootstrap(df_swap)
 ZC = BS.get_zerocurve()
 # Merge with values from Mark-Jan to check if we indeed are OK
 merged = BS.merge(df_zerocurve)
-"""
+
 # Plot the obtained zerocurve together with Mark-Jan's zero curve and the swapcurve
 #plot_zcs(df_swap,ZC, df_zerocurve,fname='zerocurve.pdf')
 
@@ -101,7 +101,7 @@ swap_DV01 = modDV01_swap(swap30,  df_cashflows['zerorate'])
 print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
 
 # Q2c: get amount of DV01 needed
-to_hedge = PV1 - PV2 + 50*modDV01_assets
+to_hedge = 1.15*(PV1 - PV2) + 50*modDV01_assets
 DV01_needed = np.abs((to_hedge/50)/(0.002726))
 print('We need (billion)', np.round(DV01_needed*1e-9,3))
 
@@ -119,7 +119,13 @@ print('Value of swap changed to ', np.round(1e-6*swapval,3), ' million')
 newassets = assets + swapval
 print('New total assets ',newassets)
 print('New FR ',100*newassets/LH3.present_day_value())
-"""
+
+# Q2e minimizer
+df_swap, df_zerocurve, df_cashflows = get_data()
+# Find swaprates for all maturities
+OS = optimize_swaps(df_cashflows)
+OS.make_swap_curve()
+
 # Q4: Vasicek-model
 VS = vasicek()
 #lambda_ = VS.find_lambda()

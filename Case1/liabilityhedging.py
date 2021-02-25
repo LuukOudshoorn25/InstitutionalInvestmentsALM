@@ -110,8 +110,40 @@ def swapvalue(swaprate, zerocurve, maturity,notional):
         discount = (1+zerocurve[i]/100)**i
         Vfixed += (swaprate/100) / discount
     # And final payment of the notional
-    Vfixed += 1/((1+zerocurve[30]/100)**maturity)
+    Vfixed += 1/((1+zerocurve[maturity]/100)**maturity)
     # floating leg
     Vfloat = (1+zerocurve[0]/100) / ((1+zerocurve[0]/100))
-    swapvalue = Vfixed - Vfloat
-    return swapvalue*notional
+    swap = Vfixed - Vfloat
+    return swap*notional
+
+
+class optimize_swaps():
+    def __init__(self,df):
+        self.df = df_cashflows
+    
+    def minimize_func(self,T):
+        # Calculate swaprate
+        # Minimize absolute value of the swap given the swaprate
+        function = lambda x: np.abs(swapvalue(x,self.df.zerorate, T, 100))
+        # For each time, find the swap rate by minimizing the absolute value
+        res = minimize(function, x0 = 0.3)
+        swaprate = res.x
+        return swaprate
+    
+    def make_swap_curve(self):
+        # Create time axis
+        times = np.arange(1,51)
+        # Create empty df to fill
+        swappers = pd.DataFrame({'Maturity':times, 'Rate':times}).set_index('Maturity')
+        for T in times:
+            # Get the swaprate
+            swappers.loc[T] = self.minimize_func(T)
+        self.swappers = swappers
+        return swappers
+
+
+
+
+
+def optimize_swaps(maturities, notionals):
+    # Calculate swaprate

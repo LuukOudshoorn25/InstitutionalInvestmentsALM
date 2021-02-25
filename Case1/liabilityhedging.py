@@ -12,6 +12,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from scipy.optimize import minimize
 
 class LiabHedger():
     def __init__(self, df):
@@ -116,10 +117,23 @@ def swapvalue(swaprate, zerocurve, maturity,notional):
     swap = Vfixed - Vfloat
     return swap*notional
 
+def bondvalue(bondrate, zerocurve, maturity, notional):
+    zerocurve = zerocurve.values.flatten()
+    # Fixed leg, ie annual payments
+    Vfixed = 0
+    for i in range(1,maturity+1):
+        # payout is one year ahead
+        # payment
+        discount = (1+zerocurve[i]/100)**i
+        Vfixed += (bondrate/100) / discount
+    # And final payment of the notional
+    Vfixed += 1/((1+zerocurve[maturity]/100)**maturity)
+    return Vfixed
 
 class optimize_swaps():
     def __init__(self,df):
-        self.df = df_cashflows
+        self.df = df
+        self.DV01_bond()
     
     def minimize_func(self,T):
         # Calculate swaprate
@@ -141,9 +155,62 @@ class optimize_swaps():
         self.swappers = swappers
         return swappers
 
+    def DV01_liabilities(self):
+        # Get DV01 of the liabilities using the original zerocurve
+        LH = LiabHedger(self.df)
+        PV1 = LH.present_day_value()
+        # Change zerocurve by one bp
+        shocked = self.df.copy()
+        shocked['zerorate'] = shocked['zerorate']-0.01
+        LH = LiabHedger(shocked)
+        PV2 = LH.present_day_value()
+        DV01_liabilities = PV1 - PV2
+        return PV1,PV2,DV01_liabilities
 
+    def DV01_bond(self):
+        # The asssets have some interest rate sensitivity
+        self.assets = 1.15*self.DV01_liabilities()[0]
+        moddv01 = modDV01_bond(-0.52,self.assets)
+        return moddv01
 
+    def DV01_swaps(self):
+        maturities = [10,30,50]
+        # Get corresponding swaprates
+        swaprates = self.swappers.loc[maturities]
+        # Get modified DV01 for the swaps modDV01_swap
+        modDV01_swaps = [modDV01_swap(w, self.df.zerorates) for w in swaprates.values.flatten()]
+        return modDV01_swaps
 
+    def values_swaps(self,zerocurve, notionals):
+        maturities = [10,30,50]
+        # Get corresponding swaprates
+        swaprates = self.swappers.loc[maturities]
+        # Get value of the swap given the new zerocurve
+        
+        newvalues = [swapvalue(swaprates.loc[maturities[w]], zerocurve, maturities[w],notionals[w]) for w in range(len(maturities))]
+        return np.sum(newvalues)
 
-def optimize_swaps(maturities, notionals):
-    # Calculate swaprate
+    def propagate(self,notionals):
+        # apply zerocurve shift
+        shocked = self.df.copy()
+        notionals = np.array(notionals)*1e9
+        shocked['zerorate'] = shocked['zerorate'] + shocked['deltazerorate']
+        # Get new liabilities
+        LH = LiabHedger(shocked)
+        PV = LH.present_day_value()
+        # Get new assets
+        swapval = self.values_swaps(shocked['zerorate'], notionals)
+        bondval = bondvalue(-0.52,shocked['zerorate'],1,self.assets)
+        newassets = self.assets + swapval + bondval
+        newFR = newassets / PV
+        return newFR*100
+
+    def optimize(self):
+        # Maturities are fixed to those in def DV01_swaps
+        # Notionals can be optimized
+        # We consider the zerocurve change from column D
+        function = lambda x: np.abs(self.propagate(x)-115)
+        res = minimize(function, x0=[10,10,10],method='SLSQP')
+        print(res)
+        return res
+

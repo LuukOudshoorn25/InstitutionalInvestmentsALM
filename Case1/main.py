@@ -17,7 +17,7 @@ import numpy as np
 from datalib import get_data
 from plottinglib import *
 from termstructure import bootstrap
-from liabilityhedging import LiabHedger, modDV01_swap,modDV01_bond,swapvalue
+from liabilityhedging import LiabHedger, modDV01_swap,modDV01_bond,swapvalue,optimize_swaps
 from vasicek import vasicek
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
@@ -125,6 +125,7 @@ df_swap, df_zerocurve, df_cashflows = get_data()
 # Find swaprates for all maturities
 OS = optimize_swaps(df_cashflows)
 OS.make_swap_curve()
+OS.optimize()
 
 # Q4: Vasicek-model
 VS = vasicek()

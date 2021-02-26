@@ -113,7 +113,7 @@ class bootstrap():
             r20 = zerocurve.loc[20]/100
             for h in range(1,41):
                 UFR = UFR_curve.loc[h].values.flatten()[0]/100
-                print(UFR)
+                
                 new_rate = ((1+UFR)**h*(1+r20)**20)**(1/(h+20))-1
                 zerocurve.loc[h+20] = new_rate*100
             return zerocurve

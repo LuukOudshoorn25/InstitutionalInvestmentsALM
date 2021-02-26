@@ -101,8 +101,9 @@ swap_DV01 = modDV01_swap(swap30,  df_cashflows['zerorate'])
 print('DV01 of swap contract: ',np.round(swap_DV01,4), ' %')
 
 # Q2c: get amount of DV01 needed
-to_hedge = 1.15*(PV1 - PV2) + 50*modDV01_assets
-DV01_needed = np.abs((to_hedge/50)/(0.002726))
+#to_hedge = 1.15*(PV1 - PV2) + 50*modDV01_assets
+to_hedge = 1.15*(45.86e6) - modDV01_assets
+DV01_needed = np.abs((to_hedge)/(0.002726))
 print('We need (billion)', np.round(DV01_needed*1e-9,3))
 
 #Q2d
@@ -121,11 +122,45 @@ print('New total assets ',newassets)
 print('New FR ',100*newassets/LH3.present_day_value())
 
 # Q2e minimizer
+
 df_swap, df_zerocurve, df_cashflows = get_data()
-# Find swaprates for all maturities
-OS = optimize_swaps(df_cashflows)
-OS.make_swap_curve()
-OS.optimize()
+# Optimize notionals for constant FR
+possible_swaps = [[10,30,40],[10,30,50],[20, 30, 40],[20, 30, 50],[30, 40, 50],[10, 20, 30],[30]]
+notionals_df = pd.DataFrame({'index':[]}).set_index('index')
+for i,s in enumerate(possible_swaps):
+    OS = optimize_swaps(df_cashflows,s)
+    OS.make_swap_curve()
+    notionals,objective = OS.optimize_FR()
+    print(s,notionals,objective)
+    if not s==[30]:
+        notionals_df.loc[i,s] = notionals
+    else:
+        notionals_df.loc[i,s] = notionals[0]
+notionals_df = notionals_df.round(2)
+notionals_df = notionals_df[[10,20,30,40,50]]
+notionals_df.index = np.arange(1,8,dtype=int)
+print(notionals_df.fillna('-').to_latex(bold_rows=True))
+
+df_swap, df_zerocurve, df_cashflows = get_data()
+# Optimize notionals for constant FR
+possible_swaps = [[10,30,40],[10,30,50],[20, 30, 40],[20, 30, 50],[30, 40, 50],[10, 20, 30],[30]]
+notionals_df = pd.DataFrame({'index':[]}).set_index('index')
+for i,s in enumerate(possible_swaps):
+    OS = optimize_swaps(df_cashflows,s)
+    OS.make_swap_curve()
+    notionals, objective = OS.optimize_DV01()
+    print(s,notionals,objective)
+    if not s==[30]:
+        notionals_df.loc[i,s] = notionals
+    else:
+        notionals_df.loc[i,s] = notionals[0]
+notionals_df = notionals_df.round(2)
+notionals_df = notionals_df[[10,20,30,40,50]]
+notionals_df.index = np.arange(1,8,dtype=int)
+print(notionals_df.fillna('-').to_latex(bold_rows=True))
+
+
+
 
 # Q4: Vasicek-model
 VS = vasicek()
@@ -146,3 +181,4 @@ VS.lambda_ = -0.53
 #plot_oneyear_hist(100*final_rates)
 
 VS.matching()
+

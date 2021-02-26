@@ -131,8 +131,9 @@ def bondvalue(bondrate, zerocurve, maturity, notional):
     return Vfixed
 
 class optimize_swaps():
-    def __init__(self,df):
+    def __init__(self,df, maturities):
         self.df = df
+        self.maturities = maturities
         self.DV01_bond()
     
     def minimize_func(self,T):
@@ -161,7 +162,7 @@ class optimize_swaps():
         PV1 = LH.present_day_value()
         # Change zerocurve by one bp
         shocked = self.df.copy()
-        shocked['zerorate'] = shocked['zerorate']-0.01
+        shocked['zerorate'] = shocked['zerorate']+0.01
         LH = LiabHedger(shocked)
         PV2 = LH.present_day_value()
         DV01_liabilities = PV1 - PV2
@@ -174,15 +175,15 @@ class optimize_swaps():
         return moddv01
 
     def DV01_swaps(self):
-        maturities = [10,30,50]
+        maturities = self.maturities
         # Get corresponding swaprates
         swaprates = self.swappers.loc[maturities]
         # Get modified DV01 for the swaps modDV01_swap
-        modDV01_swaps = [modDV01_swap(w, self.df.zerorates) for w in swaprates.values.flatten()]
-        return modDV01_swaps
+        modDV01_swaps = [modDV01_swap(w, self.df.zerorate) for w in swaprates.values.flatten()]
+        return np.array(modDV01_swaps)
 
     def values_swaps(self,zerocurve, notionals):
-        maturities = [10,30,50]
+        maturities = self.maturities
         # Get corresponding swaprates
         swaprates = self.swappers.loc[maturities]
         # Get value of the swap given the new zerocurve
@@ -190,11 +191,11 @@ class optimize_swaps():
         newvalues = [swapvalue(swaprates.loc[maturities[w]], zerocurve, maturities[w],notionals[w]) for w in range(len(maturities))]
         return np.sum(newvalues)
 
-    def propagate(self,notionals):
+    def propagate_FR(self,notionals):
         # apply zerocurve shift
         shocked = self.df.copy()
         notionals = np.array(notionals)*1e9
-        shocked['zerorate'] = shocked['zerorate'] + shocked['deltazerorate']
+        shocked['zerorate'] = shocked['zerorate'] - 0.01#shocked['deltazerorate']
         # Get new liabilities
         LH = LiabHedger(shocked)
         PV = LH.present_day_value()
@@ -205,12 +206,35 @@ class optimize_swaps():
         newFR = newassets / PV
         return newFR*100
 
-    def optimize(self):
+    def propagate_DV01(self,notionals):
+        # apply zerocurve shift
+        shocked = self.df.copy()
+        notionals = np.array(notionals)*1e9
+        # Get DV01 of liabilities
+        #PV1,PV2,DV01_liabilities = self.DV01_liabilities()
+        DV01_liabilities = 45.86e6
+        #print('DV01 liabilities',DV01_liabilities)
+        # Get DV01 of assets
+        DV01_assets = self.DV01_bond()
+        #print('DV01 swaps ',self.DV01_swaps())
+        DV01_assets += np.sum(notionals*self.DV01_swaps()/100)
+        # Get difference between DV01
+        return np.abs(1.15*DV01_liabilities - DV01_assets)
+        
+
+    def optimize_FR(self):
         # Maturities are fixed to those in def DV01_swaps
         # Notionals can be optimized
         # We consider the zerocurve change from column D
-        function = lambda x: np.abs(self.propagate(x)-115)
+        function = lambda x: np.abs(self.propagate_FR(x)-115)
         res = minimize(function, x0=[10,10,10],method='SLSQP')
-        print(res)
-        return res
+        return res.x, res.fun
+
+    def optimize_DV01(self):
+        # Maturities are fixed to those in def DV01_swaps
+        # Notionals can be optimized
+        # We consider the zerocurve change from column D
+        bounds = len(self.maturities)*[(0,np.inf)]
+        res = minimize(self.propagate_DV01, x0=len(self.maturities)*[2],method='SLSQP',bounds=bounds)
+        return res.x, res.fun
 

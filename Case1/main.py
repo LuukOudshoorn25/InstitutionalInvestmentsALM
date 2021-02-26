@@ -122,7 +122,7 @@ print('New total assets ',newassets)
 print('New FR ',100*newassets/LH3.present_day_value())
 
 # Q2e minimizer
-
+effectiveness_df = pd.DataFrame({'Matchtype':[],'Portfolio':[],'New FR':[]})
 df_swap, df_zerocurve, df_cashflows = get_data()
 # Optimize notionals for constant FR
 possible_swaps = [[10,30,40],[10,30,50],[20, 30, 40],[20, 30, 50],[30, 40, 50],[10, 20, 30],[30]]
@@ -141,8 +141,21 @@ notionals_df = notionals_df[[10,20,30,40,50]]
 notionals_df.index = np.arange(1,8,dtype=int)
 print(notionals_df.fillna('-').to_latex(bold_rows=True))
 
+# Test performance
+for portfolio,row in notionals_df.iterrows():
+    r=row.dropna()
+    newFR=1
+    maturities = r.index
+    notionals  = r.values
+    OS = optimize_swaps(df_cashflows,maturities,shock='shock2')
+    OS.make_swap_curve()
+    newFR = OS.propagate_FR(notionals)
+    effectiveness_df.loc[portfolio]=['FR',portfolio,newFR]
+
+
+
 df_swap, df_zerocurve, df_cashflows = get_data()
-# Optimize notionals for constant FR
+# Optimize notionals for equal DV01
 possible_swaps = [[10,30,40],[10,30,50],[20, 30, 40],[20, 30, 50],[30, 40, 50],[10, 20, 30],[30]]
 notionals_df = pd.DataFrame({'index':[]}).set_index('index')
 for i,s in enumerate(possible_swaps):
@@ -158,6 +171,23 @@ notionals_df = notionals_df.round(2)
 notionals_df = notionals_df[[10,20,30,40,50]]
 notionals_df.index = np.arange(1,8,dtype=int)
 print(notionals_df.fillna('-').to_latex(bold_rows=True))
+
+
+
+for portfolio,row in notionals_df.iterrows():
+    r=row.dropna()
+    newFR=1
+    maturities = r.index
+    notionals  = r.values
+    OS = optimize_swaps(df_cashflows,maturities,shock='shock2')
+    OS.make_swap_curve()
+    newFR = OS.propagate_FR(notionals)
+    effectiveness_df.loc[portfolio+7]=['DV01',portfolio,newFR]
+
+effectiveness_df = effectiveness_df.set_index(['Matchtype','Portfolio'])
+effectiveness_df = effectiveness_df.unstack().T.round(2)
+print(effectiveness_df.fillna('-').to_latex(bold_rows=True))
+    
 
 
 

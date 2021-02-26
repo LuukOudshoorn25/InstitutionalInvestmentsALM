@@ -131,8 +131,9 @@ def bondvalue(bondrate, zerocurve, maturity, notional):
     return Vfixed
 
 class optimize_swaps():
-    def __init__(self,df, maturities):
+    def __init__(self,df, maturities,shock='DV01'):
         self.df = df
+        self.shock = shock
         self.maturities = maturities
         self.DV01_bond()
     
@@ -162,7 +163,10 @@ class optimize_swaps():
         PV1 = LH.present_day_value()
         # Change zerocurve by one bp
         shocked = self.df.copy()
-        shocked['zerorate'] = shocked['zerorate']+0.01
+        if self.shock=='DV01':
+            shocked['zerorate'] = shocked['zerorate'] - 0.01#shocked['deltazerorate']
+        elif self.shock=='shock2':
+            shocked['zerorate'] = shocked['zerorate'] + shocked['deltazerorate']
         LH = LiabHedger(shocked)
         PV2 = LH.present_day_value()
         DV01_liabilities = PV1 - PV2
@@ -195,7 +199,10 @@ class optimize_swaps():
         # apply zerocurve shift
         shocked = self.df.copy()
         notionals = np.array(notionals)*1e9
-        shocked['zerorate'] = shocked['zerorate'] - 0.01#shocked['deltazerorate']
+        if self.shock=='DV01':
+            shocked['zerorate'] = shocked['zerorate'] - 0.01#shocked['deltazerorate']
+        elif self.shock=='shock2':
+            shocked['zerorate'] = shocked['zerorate'] + shocked['deltazerorate']
         # Get new liabilities
         LH = LiabHedger(shocked)
         PV = LH.present_day_value()

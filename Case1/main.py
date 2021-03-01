@@ -21,7 +21,7 @@ from liabilityhedging import LiabHedger, modDV01_swap,modDV01_bond,swapvalue,opt
 from vasicek import vasicek
 # Get data
 df_swap, df_zerocurve, df_cashflows = get_data()
-
+"""
 # Q1: Term structure of interest rates
 # Let us first plot the swap rates as function of maturity
 #plot_swaprates(df_swap)
@@ -188,17 +188,34 @@ effectiveness_df = effectiveness_df.set_index(['Matchtype','Portfolio'])
 effectiveness_df = effectiveness_df.unstack().T.round(2)
 print(effectiveness_df.fillna('-').to_latex(bold_rows=True))
     
+"""
 
 
-
-
-# Q4: Vasicek-model
+# # Q4: Vasicek-model
 VS = vasicek()
 #lambda_ = VS.find_lambda()
 #print(lambda_)
-# Complete term structure of nominal interest rates
 VS.lambda_ = -0.53
-#zerorates = VS.termstructure()
+# Complete term structure of nominal interest rates
+zerorates_Q = VS.termstructure_Q()
+plot_vasicek_termstructure(np.arange(0,61,1), zerorates_Q, df_cashflows['zerorate'])
+# calculate new nominal liabilities and obtain new swap rate
+PV = VS.value_liabilities(zerorates_Q)
+print('Present value of liabilities in billions under Vasicek ',np.round(PV*1e-9,3))
+# Q4c: Resulting distribution after one year
+final_rates = VS.one_year()
+plot_oneyear_hist(100*final_rates)
+# Q4d: Show all_termstructures
+all_termstructures = VS.all_termstructures(distribution_r=final_rates)
+plt.plot(all_termstructures.transpose())
+plt.show()
+# Q4d: calculate the
+tracking_error = VS.valuation(cash=PV, termstructures=all_termstructures)
+print('Mean difference between assets and liabilities is ', np.round(np.mean(tracking_error)))
+print('Tracking error is ', np.round(np.std(tracking_error)))
+
+
+
 # Q4b: Apply zerorates to liabilities from Q2
 #_,_, df_cashflows = get_data()
 #df_cashflows['zerorate'] = zerorates*100
@@ -206,9 +223,6 @@ VS.lambda_ = -0.53
 #PV = LH.present_day_value()
 #print('Present value of liabilities in billions under Vasicek ',np.round(PV*1e-9,3))
 #plot_zerorates(df_cashflows, fname='Vasicek_termstructure.pdf')
-# Q4c: Resulting distribution after one year
-#final_rates = VS.one_year()
-#plot_oneyear_hist(100*final_rates)
+
 
 VS.matching()
-

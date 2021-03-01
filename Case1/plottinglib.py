@@ -138,10 +138,21 @@ def plot_Q2_zerocurves(rates1,rates2, rates3, label1, label2, label3):
     plt.savefig('allzerocurvesQ2.pdf', bbox_inches='tight')
     plt.show()
 
+def plot_vasicek_termstructure(times, risk_neutral_rates, zerorates):
+    fig, ax=plt.subplots(1)
+    ax.plot(times, risk_neutral_rates*100, color='black', lw=1, label='Simulated under $\mathbb{Q}$')
+    ax.plot(times, zerorates, color='black', ls='--', lw=0.7, label='Bootstrapped zerorates')
+    plt.legend()
+    plt.tight_layout()
+    plt.xlabel('Maturity [years]')
+    plt.ylabel('Zero rate [%]')
+    plt.savefig('vasicek_termstructure.pdf', bbox_inches='tight')
+    plt.show()
+
 def plot_oneyear_hist(rates):
     #plt.hist(rates, histtype='step',lw=1,color='black')
     fig, ax = plt.subplots()
-    sns.distplot(rates, hist=True, bins=30, kde=True, color='dodgerblue',
+    sns.distplot(rates, hist=True, bins=30, kde=True, color='black',
                 hist_kws={'edgecolor': 'black'},
                 kde_kws={'linewidth': 0.7}, ax=ax)
     plt.tight_layout()
